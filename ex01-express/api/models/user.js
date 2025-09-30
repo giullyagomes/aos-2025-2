@@ -1,42 +1,27 @@
-const getUserModel = (sequelize, { DataTypes }) => {
-  const User = sequelize.define("user", {
+import { DataTypes } from "sequelize";
+
+const buildUserSchema = (dbInstance, { DataTypes }) => {
+const UserEntity = dbInstance.define("user", {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
     username: {
       type: DataTypes.STRING,
-      unique: true,
       allowNull: false,
-      validate: {
-        notEmpty: true,
-      },
     },
     email: {
       type: DataTypes.STRING,
-      unique: true,
       allowNull: false,
-      validate: {
-        notEmpty: true,
-      },
     },
   });
 
-  User.associate = (models) => {
-    User.hasMany(models.Message, { onDelete: "CASCADE" });
+  UserEntity.associate = (dbModels) => {
+    UserEntity.hasMany(dbModels.Message, { foreignKey: "userId" });
   };
 
-  User.findByLogin = async (login) => {
-    let user = await User.findOne({
-      where: { username: login },
-    });
-
-    if (!user) {
-      user = await User.findOne({
-        where: { email: login },
-      });
-    }
-
-    return user;
-  };
-
-  return User;
+  return UserEntity;
 };
 
-export default getUserModel;
+export default buildUserSchema;

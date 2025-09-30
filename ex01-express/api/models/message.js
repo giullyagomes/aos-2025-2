@@ -1,5 +1,12 @@
-const getMessageModel = (sequelize, { DataTypes }) => {
-  const Message = sequelize.define("message", {
+import { DataTypes } from "sequelize";
+
+const createMessageSchema = (dbConnection, { DataTypes }) => {
+const MessageEntity = dbConnection.define("message", {
+    id: {
+      type: DataTypes.UUID, 
+      defaultValue: DataTypes.UUIDV4,
+      primaryKey: true,
+    },
     text: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -7,13 +14,17 @@ const getMessageModel = (sequelize, { DataTypes }) => {
         notEmpty: true,
       },
     },
+    userId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
   });
 
-  Message.associate = (models) => {
-    Message.belongsTo(models.User);
+  MessageEntity.associate = (dbModels) => {
+    MessageEntity.belongsTo(dbModels.User, { foreignKey: "userId" });
   };
 
-  return Message;
+  return MessageEntity;
 };
 
-export default getMessageModel;
+export default createMessageSchema;

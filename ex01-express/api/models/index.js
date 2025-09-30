@@ -1,10 +1,10 @@
 import Sequelize from "sequelize";
 
-import getUserModel from "./user";
-import getMessageModel from "./message";
+import buildUserSchema from "./user";
+import createMessageSchema from "./message";
 
 //POSTGRES_URL
-const sequelize = new Sequelize(process.env.POSTGRES_URL, {
+const databaseConnection = new Sequelize(process.env.POSTGRES_URL, {
   dialect: "postgres",
   protocol: "postgres",
   // logging: false, // Disable SQL query logging
@@ -18,17 +18,17 @@ const sequelize = new Sequelize(process.env.POSTGRES_URL, {
   dialectModule: require("pg"),
 });
 
-const models = {
-  User: getUserModel(sequelize, Sequelize),
-  Message: getMessageModel(sequelize, Sequelize),
+const databaseModels = {
+  User: buildUserSchema(databaseConnection, Sequelize),
+  Message: createMessageSchema(databaseConnection, Sequelize),
 };
 
-Object.keys(models).forEach((key) => {
-  if ("associate" in models[key]) {
-    models[key].associate(models);
+Object.keys(databaseModels).forEach((modelName) => {
+  if ("associate" in databaseModels[modelName]) {
+    databaseModels[modelName].associate(databaseModels);
   }
 });
 
-export { sequelize };
+export { databaseConnection as sequelize };
 
-export default models;
+export default databaseModels;
