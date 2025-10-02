@@ -1,11 +1,14 @@
 import session from "./session";
-import userRouter from "./user";
-import messageRouter from "./message";
+import user from "./user";
+import message from "./message";
 import root from "./root";
+import tarefas from "./tarefas";
+
 
 export default {
   root,
   session,
-  user: userRouter,
-  message: messageRouter,
+  user,
+  message,
+  tarefas
 };

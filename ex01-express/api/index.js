@@ -2,58 +2,61 @@ import "dotenv/config";
 import cors from "cors";
 import express from "express";
 
-import databaseModels, { sequelize as databaseConnection } from "./models";
-import apiRoutes from "./routes";
+import models, { sequelize } from "./models";
+import routes from "./routes";
 
-const serverApp = express();
-serverApp.set("trust proxy", true);
+const app = express();
+app.set("trust proxy", true);
 
-var corsConfiguration = {
+var corsOptions = {
   origin: ["http://example.com", "*"],
   optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
 };
-serverApp.use(cors(corsConfiguration));
+app.use(cors(corsOptions));
 
-serverApp.use((request, response, nextMiddleware) => {
-  console.log(`${request.method} ${request.path} - ${request.ip}`);
-  nextMiddleware();
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.path} - ${req.ip}`);
+  next();
 });
 
 // Código para conseguir extrair o conteúdo do body da mensagem HTTP
 // e armazenar na propriedade req.body (utiliza o body-parser)
-serverApp.use(express.json());
-serverApp.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Código para injetar no context o usuário que está logado e os models
-serverApp.use(async (request, response, nextMiddleware) => {
-  request.context = {
-    models: databaseModels,
-    me: await databaseModels.User.findByPk(1),
+app.use(async (req, res, next) => {
+  req.context = {
+    models,
+    me: await models.User.findByPk(1),
   };
-  nextMiddleware();
+  next();
 });
 
-serverApp.use("/", apiRoutes.root);
-serverApp.use("/session", apiRoutes.session);
-serverApp.use("/users", apiRoutes.user);
-serverApp.use("/messages", apiRoutes.message);
+app.use("/", routes.root);
+app.use("/session", routes.session);
+app.use("/users", routes.user);
+app.use("/messages", routes.message);
+app.use("/tarefas", routes.tarefas);
 
-const serverPort = process.env.PORT ?? 3000;
 
-const shouldEraseDatabase = process.env.ERASE_DATABASE === "true";
 
-databaseConnection.sync({ force: shouldEraseDatabase }).then(async () => {
-  if (shouldEraseDatabase) {
-    initializeUsersWithMessages();
+const port = process.env.PORT ?? 3000;
+
+const eraseDatabaseOnSync = process.env.ERASE_DATABASE === "true";
+
+sequelize.sync({ force: eraseDatabaseOnSync }).then(async () => {
+  if (eraseDatabaseOnSync) {
+    createUsersWithMessages();
   }
 
-  serverApp.listen(serverPort, () => {
-    console.log(`Application server listening on port ${serverPort}!`);
+  app.listen(port, () => {
+    console.log(`Example app listening on port ${port}!`);
   });
 });
 
-const initializeUsersWithMessages = async () => {
-  await databaseModels.User.create(
+const createUsersWithMessages = async () => {
+  await models.User.create(
     {
       username: "rwieruch",
       email: "rwieruch@email.com",
@@ -67,11 +70,11 @@ const initializeUsersWithMessages = async () => {
       ],
     },
     {
-      include: [databaseModels.Message],
+      include: [models.Message],
     }
   );
 
-  await databaseModels.User.create(
+  await models.User.create(
     {
       username: "ddavids",
       email: "ddavids@email.com",
@@ -85,7 +88,7 @@ const initializeUsersWithMessages = async () => {
       ],
     },
     {
-      include: [databaseModels.Message],
+      include: [models.Message],
     }
   );
 };
