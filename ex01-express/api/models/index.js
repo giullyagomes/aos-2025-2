@@ -22,7 +22,7 @@ const sequelize = new Sequelize(process.env.POSTGRES_URL, {
 const models = {
   User: getUserModel(sequelize, Sequelize),
   Message: getMessageModel(sequelize, Sequelize),
-  Task: getTarefasModel(sequelize, Sequelize),
+  Tarefas: getTarefasModel(sequelize, Sequelize),
 };
 
 Object.keys(models).forEach((key) => {

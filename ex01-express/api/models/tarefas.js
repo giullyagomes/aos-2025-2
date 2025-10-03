@@ -1,7 +1,7 @@
 import { DataTypes } from "sequelize";
 
 const getTarefasModel = (dbConnection, { DataTypes }) => {
-const Tarefas = dbConnection.define("message", {
+const Tarefas = dbConnection.define("tarefas", {
     objectid: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
@@ -20,9 +20,6 @@ const Tarefas = dbConnection.define("message", {
     },
   });
 
-  Tarefas.associate = (dbModels) => {
-    Tarefas.belongsTo(dbModels.User, { foreignKey: "userId" });
-  };
 
   return Tarefas;
 };
